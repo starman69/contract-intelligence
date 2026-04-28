@@ -109,7 +109,7 @@ sequenceDiagram
 
     U->>UI: question
     UI->>API: POST /query
-    API->>API: classify intent (rules first; gpt-4o-mini fallback)
+    API->>API: classify intent (rules first, gpt-4o-mini fallback)
     alt reporting
         API->>SQL: parameterized SELECT
         SQL-->>API: rows
