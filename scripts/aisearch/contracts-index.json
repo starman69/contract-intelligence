@@ -1,0 +1,62 @@
+{
+  "name": "contracts-index",
+  "fields": [
+    { "name": "contractId", "type": "Edm.String", "key": true, "filterable": true, "retrievable": true },
+    { "name": "title", "type": "Edm.String", "searchable": true, "retrievable": true, "analyzer": "en.microsoft" },
+    { "name": "counterparty", "type": "Edm.String", "filterable": true, "facetable": true, "searchable": true, "retrievable": true },
+    { "name": "contractType", "type": "Edm.String", "filterable": true, "facetable": true, "retrievable": true },
+    { "name": "effectiveDate", "type": "Edm.DateTimeOffset", "filterable": true, "sortable": true, "retrievable": true },
+    { "name": "expirationDate", "type": "Edm.DateTimeOffset", "filterable": true, "sortable": true, "retrievable": true },
+    { "name": "status", "type": "Edm.String", "filterable": true, "facetable": true, "retrievable": true },
+    { "name": "legalOwner", "type": "Edm.String", "filterable": true, "facetable": true, "retrievable": true },
+    { "name": "businessUnit", "type": "Edm.String", "filterable": true, "facetable": true, "retrievable": true },
+    { "name": "summary", "type": "Edm.String", "searchable": true, "retrievable": true, "analyzer": "en.microsoft" },
+    { "name": "searchableText", "type": "Edm.String", "searchable": true, "retrievable": false, "analyzer": "en.microsoft" },
+    { "name": "embedding", "type": "Collection(Edm.Single)", "searchable": true, "retrievable": false, "dimensions": 1536, "vectorSearchProfile": "default-vector-profile" },
+    { "name": "permissionPrincipals", "type": "Collection(Edm.String)", "filterable": true, "retrievable": true },
+    { "name": "metadataVersion", "type": "Edm.Int32", "filterable": true, "retrievable": true },
+    { "name": "extractionVersion", "type": "Edm.Int32", "filterable": true, "retrievable": true }
+  ],
+  "vectorSearch": {
+    "algorithms": [
+      {
+        "name": "hnsw-default",
+        "kind": "hnsw",
+        "hnswParameters": {
+          "metric": "cosine",
+          "m": 4,
+          "efConstruction": 400,
+          "efSearch": 500
+        }
+      }
+    ],
+    "profiles": [
+      {
+        "name": "default-vector-profile",
+        "algorithm": "hnsw-default"
+      }
+    ]
+  },
+  "semantic": {
+    "configurations": [
+      {
+        "name": "default",
+        "prioritizedFields": {
+          "titleField": { "fieldName": "title" },
+          "prioritizedContentFields": [
+            { "fieldName": "summary" },
+            { "fieldName": "searchableText" }
+          ],
+          "prioritizedKeywordsFields": [
+            { "fieldName": "counterparty" },
+            { "fieldName": "contractType" }
+          ]
+        }
+      }
+    ]
+  },
+  "corsOptions": {
+    "allowedOrigins": ["*"],
+    "maxAgeInSeconds": 60
+  }
+}

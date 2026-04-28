@@ -1,0 +1,256 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --color-bg: oklch(98% 0 0);
+  --color-fg: oklch(15% 0 0);
+  --color-card: oklch(100% 0 0);
+  --color-card-2: oklch(97% 0 0);
+  --color-muted-fg: oklch(50% 0 0);
+  --color-border: oklch(90% 0 0);
+  --color-border-strong: oklch(82% 0 0);
+  --color-accent: oklch(55% 0.18 250);
+  --color-accent-fg: oklch(99% 0 0);
+  --color-accent-soft: oklch(96% 0.04 250);
+  --color-ring: oklch(55% 0.18 250 / 0.55);
+  --color-overlay: oklch(15% 0 0 / 0.35);
+
+  --color-ok-bg: oklch(94% 0.05 145);
+  --color-ok-fg: oklch(35% 0.10 145);
+  --color-warn-bg: oklch(94% 0.07 70);
+  --color-warn-fg: oklch(40% 0.13 50);
+  --color-danger-bg: oklch(94% 0.05 25);
+  --color-danger-fg: oklch(40% 0.15 25);
+  --color-info-bg: oklch(94% 0.04 250);
+  --color-info-fg: oklch(35% 0.12 250);
+}
+
+.dark {
+  --color-bg: oklch(15% 0.005 260);
+  --color-fg: oklch(96% 0 0);
+  --color-card: oklch(19% 0.005 260);
+  --color-card-2: oklch(22% 0.005 260);
+  --color-muted-fg: oklch(68% 0 0);
+  --color-border: oklch(28% 0.005 260);
+  --color-border-strong: oklch(38% 0.005 260);
+  --color-accent: oklch(72% 0.16 250);
+  --color-accent-fg: oklch(15% 0 0);
+  --color-accent-soft: oklch(28% 0.06 250);
+  --color-ring: oklch(72% 0.16 250 / 0.55);
+  --color-overlay: oklch(0% 0 0 / 0.6);
+
+  --color-ok-bg: oklch(28% 0.07 145);
+  --color-ok-fg: oklch(86% 0.12 145);
+  --color-warn-bg: oklch(30% 0.10 70);
+  --color-warn-fg: oklch(88% 0.14 80);
+  --color-danger-bg: oklch(30% 0.10 25);
+  --color-danger-fg: oklch(86% 0.13 25);
+  --color-info-bg: oklch(28% 0.07 250);
+  --color-info-fg: oklch(86% 0.13 250);
+}
+
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-fg: var(--color-fg);
+  --color-card: var(--color-card);
+  --color-card-2: var(--color-card-2);
+  --color-muted-fg: var(--color-muted-fg);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+  --color-accent: var(--color-accent);
+  --color-accent-fg: var(--color-accent-fg);
+  --color-accent-soft: var(--color-accent-soft);
+  --color-ring: var(--color-ring);
+  --color-overlay: var(--color-overlay);
+
+  --color-ok-bg: var(--color-ok-bg);
+  --color-ok-fg: var(--color-ok-fg);
+  --color-warn-bg: var(--color-warn-bg);
+  --color-warn-fg: var(--color-warn-fg);
+  --color-danger-bg: var(--color-danger-bg);
+  --color-danger-fg: var(--color-danger-fg);
+  --color-info-bg: var(--color-info-bg);
+  --color-info-fg: var(--color-info-fg);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+  *,
+  *::before,
+  *::after {
+    border-color: var(--color-border);
+  }
+  ::selection {
+    background: color-mix(in oklch, var(--color-accent) 35%, transparent);
+  }
+  :focus-visible {
+    outline: none;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg
+      px-4 py-2 text-sm font-medium leading-none
+      transition-[transform,background-color,border-color,box-shadow,color,opacity]
+      duration-150 ease-out
+      cursor-pointer
+      select-none
+      active:scale-[0.98]
+      focus-visible:ring-2 focus-visible:ring-offset-2
+      disabled:opacity-50 disabled:pointer-events-none;
+    --tw-ring-color: var(--color-ring);
+    --tw-ring-offset-color: var(--color-bg);
+  }
+  .btn-primary {
+    background: var(--color-accent);
+    color: var(--color-accent-fg);
+    /* Transparent 1px border so primary and ghost buttons share the same
+       outer box dimensions (otherwise ghost is 2px taller and Clear "jumps"
+       in after the first query). */
+    border: 1px solid transparent;
+    box-shadow: 0 1px 2px color-mix(in oklch, var(--color-accent) 30%, transparent);
+  }
+  .btn-primary:hover:not(:disabled) {
+    box-shadow: 0 4px 12px color-mix(in oklch, var(--color-accent) 35%, transparent);
+    filter: brightness(1.05);
+  }
+  html.dark .btn-primary {
+    box-shadow: none;
+  }
+  html.dark .btn-primary:hover:not(:disabled) {
+    box-shadow: 0 0 0 1px color-mix(in oklch, var(--color-accent) 40%, transparent);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--color-fg);
+    border: 1px solid var(--color-border);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: var(--color-accent-soft);
+  }
+  .btn-icon {
+    @apply h-9 w-9 rounded-full p-0;
+  }
+  .btn-icon.btn-ghost {
+    border-color: var(--color-border);
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2 py-[0.15rem]
+      text-xs font-medium leading-none whitespace-nowrap;
+    background: var(--color-info-bg);
+    color: var(--color-info-fg);
+  }
+  .badge-ok        { background: var(--color-ok-bg);     color: var(--color-ok-fg); }
+  .badge-warn      { background: var(--color-warn-bg);   color: var(--color-warn-fg); }
+  .badge-danger    { background: var(--color-danger-bg); color: var(--color-danger-fg); }
+  .badge-info      { background: var(--color-info-bg);   color: var(--color-info-fg); }
+
+  .field {
+    @apply w-full rounded-lg px-3 py-2 text-sm leading-normal
+      transition-[border-color,box-shadow] duration-150;
+    background: var(--color-card);
+    color: var(--color-fg);
+    border: 1px solid var(--color-border);
+  }
+  .field::placeholder {
+    color: var(--color-muted-fg);
+  }
+  .field:focus-visible {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-ring);
+  }
+
+  .composer {
+    @apply flex flex-col rounded-lg
+      transition-[border-color,box-shadow] duration-150;
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+  }
+  .composer:focus-within {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-ring);
+  }
+  .composer-input {
+    @apply w-full resize-none px-3 py-2.5 text-sm leading-normal;
+    background: transparent;
+    color: var(--color-fg);
+    border: 0;
+    outline: none;
+    min-height: 4.5rem;
+  }
+  .composer-input::placeholder {
+    color: var(--color-muted-fg);
+  }
+  .composer-actions {
+    @apply flex items-center justify-end gap-2 px-2 py-2;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .surface-card {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+
+  .suggestion-card {
+    @apply relative cursor-pointer rounded-lg px-3 py-2.5 text-left text-sm leading-snug
+      transition-[transform,border-color,background-color,box-shadow,color]
+      duration-200 ease-out
+      active:scale-[0.99]
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+      disabled:opacity-50 disabled:pointer-events-none;
+    background: var(--color-card);
+    color: var(--color-fg);
+    border: 1px solid var(--color-border);
+    --tw-ring-color: var(--color-ring);
+    --tw-ring-offset-color: var(--color-bg);
+  }
+  .suggestion-card:hover:not(:disabled) {
+    border-color: var(--color-accent);
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px color-mix(in oklch, var(--color-accent) 18%, transparent);
+  }
+  html.dark .suggestion-card:hover:not(:disabled) {
+    box-shadow: 0 0 0 1px color-mix(in oklch, var(--color-accent) 35%, transparent),
+                0 6px 18px color-mix(in oklch, var(--color-accent) 12%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn,
+    body,
+    .field {
+      transition: none !important;
+    }
+    .btn:active {
+      transform: none;
+    }
+  }
+}

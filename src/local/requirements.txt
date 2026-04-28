@@ -1,0 +1,18 @@
+# Local-mode runtime dependencies (FastAPI + watcher).
+#
+# Deliberately omits the azure-* SDKs that the local profile never reaches at
+# runtime: azure-identity (no managed identity), azure-ai-documentintelligence
+# (replaced by unstructured.io), azure-search-documents (replaced by Qdrant).
+# shared/clients.py lazy-imports them so missing them is fine.
+
+fastapi==0.115.4
+uvicorn[standard]==0.32.0
+azure-storage-blob==12.23.1
+openai==1.54.5
+# openai 1.54 still passes `proxies=` to httpx; httpx 0.28 removed that
+# kwarg (https://github.com/openai/openai-python/issues/1953). Pin until we
+# move openai to a version that supports httpx 0.28+.
+httpx<0.28
+pyodbc==5.2.0
+qdrant-client==1.12.1
+requests==2.32.3

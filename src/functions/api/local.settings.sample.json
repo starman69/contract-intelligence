@@ -1,0 +1,20 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage__accountName": "<storage account name>",
+    "AzureWebJobsStorage__credential": "managedidentity",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "FUNCTIONS_EXTENSION_VERSION": "~4",
+    "OPENAI_ENDPOINT": "https://<oai>.openai.azure.com/",
+    "OPENAI_API_VERSION": "2024-10-21",
+    "OPENAI_DEPLOYMENT_EXTRACTION": "gpt-4o-mini",
+    "OPENAI_DEPLOYMENT_REASONING": "gpt-4o",
+    "OPENAI_DEPLOYMENT_EMBEDDING": "text-embedding-3-small",
+    "DOC_INTELLIGENCE_ENDPOINT": "https://<di>.cognitiveservices.azure.com/",
+    "SEARCH_SERVICE_ENDPOINT": "https://<srch>.search.windows.net",
+    "SEARCH_INDEX_CONTRACTS": "contracts-index",
+    "SEARCH_INDEX_CLAUSES": "clauses-index",
+    "SQL_SERVER": "<sql>.database.windows.net",
+    "SQL_DATABASE": "sqldb-contracts"
+  }
+}

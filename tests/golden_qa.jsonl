@@ -1,0 +1,25 @@
+{"id":"q-r-001","question":"Show me contracts expiring in the next 90 days","expected_intent":"reporting","expected_data_sources":["sql"]}
+{"id":"q-r-002","question":"List all supplier agreements with auto-renewal","expected_intent":"reporting","expected_data_sources":["sql"]}
+{"id":"q-r-003","question":"How many contracts are missing governing law?","expected_intent":"reporting","expected_data_sources":["sql"]}
+{"id":"q-r-004","question":"Show me contracts expiring before 2026-12-31","expected_intent":"reporting","expected_data_sources":["sql"]}
+{"id":"q-r-005","question":"Count contracts by jurisdiction","expected_intent":"reporting","expected_data_sources":["sql"]}
+{"id":"q-r-006","question":"List contracts with auto-renewal expiring in the next 6 months","expected_intent":"reporting","expected_data_sources":["sql"]}
+{"id":"q-r-007","question":"Show me supplier contracts effective after 2024-01-01","expected_intent":"reporting","expected_data_sources":["sql"]}
+{"id":"q-r-008","question":"How many contracts are missing expiration?","expected_intent":"reporting","expected_data_sources":["sql"]}
+{"id":"q-s-001","question":"What does the Northwind MSA say about audit rights?","expected_intent":"search","expected_data_sources":["ai_search"]}
+{"id":"q-s-002","question":"Find contracts mentioning SOC 2 compliance","expected_intent":"search","expected_data_sources":["ai_search"]}
+{"id":"q-s-003","question":"Search for liability caps","expected_intent":"search","expected_data_sources":["ai_search"]}
+{"id":"q-s-004","question":"Summarize the termination rights in the Foo MSA","expected_intent":"search","expected_data_sources":["ai_search"]}
+{"id":"q-s-005","question":"Tell me about Northwind's renewal terms","expected_intent":"search","expected_data_sources":["ai_search"]}
+{"id":"q-s-006","question":"What does the Bar SOW say about payment terms?","expected_intent":"search","expected_data_sources":["ai_search"]}
+{"id":"q-s-007","question":"Find contracts mentioning data breach notification","expected_intent":"search","expected_data_sources":["ai_search"]}
+{"id":"q-s-008","question":"Summarize the indemnity provisions in the Northwind MSA","expected_intent":"search","expected_data_sources":["ai_search"]}
+{"id":"q-c-001","question":"Compare the indemnity clause in the Northwind MSA to our standard","expected_intent":"clause_comparison","expected_data_sources":["sql","gold_clauses","llm"]}
+{"id":"q-c-002","question":"How does the limitation of liability in the Foo MSA differ from our standard?","expected_intent":"clause_comparison","expected_data_sources":["sql","gold_clauses","llm"]}
+{"id":"q-c-003","question":"Is the termination clause in the Bar SOW more favorable than our policy?","expected_intent":"clause_comparison","expected_data_sources":["sql","gold_clauses","llm"]}
+{"id":"q-c-004","question":"Show me risky clauses across our supplier contracts","expected_intent":"mixed","expected_data_sources":["sql","embeddings","contracts_index","clauses_index","llm"]}
+{"id":"q-c-005","question":"Compare the confidentiality clause in the Northwind MSA against our gold standard","expected_intent":"clause_comparison","expected_data_sources":["sql","gold_clauses","llm"]}
+{"id":"q-g-001","question":"Which contracts are subsidiaries of Acme?","expected_intent":"relationship","expected_data_sources":["graph"]}
+{"id":"q-g-002","question":"Show me amendments to the Foo MSA","expected_intent":"relationship","expected_data_sources":["graph"]}
+{"id":"q-amb-001","question":"Tell me about Acme contracts","expected_intent":"search","expected_data_sources":["ai_search"]}
+{"id":"q-amb-002","question":"Acme MSA","expected_intent":"search","expected_data_sources":["ai_search"]}

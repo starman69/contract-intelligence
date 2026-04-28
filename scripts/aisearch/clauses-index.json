@@ -1,0 +1,56 @@
+{
+  "name": "clauses-index",
+  "fields": [
+    { "name": "clauseId", "type": "Edm.String", "key": true, "filterable": true, "retrievable": true },
+    { "name": "contractId", "type": "Edm.String", "filterable": true, "retrievable": true },
+    { "name": "clauseType", "type": "Edm.String", "filterable": true, "facetable": true, "retrievable": true },
+    { "name": "clauseText", "type": "Edm.String", "searchable": true, "retrievable": true, "analyzer": "en.microsoft" },
+    { "name": "pageNumber", "type": "Edm.Int32", "filterable": true, "sortable": true, "retrievable": true },
+    { "name": "sectionHeading", "type": "Edm.String", "searchable": true, "retrievable": true },
+    { "name": "riskLevel", "type": "Edm.String", "filterable": true, "facetable": true, "retrievable": true },
+    { "name": "standardClauseId", "type": "Edm.String", "filterable": true, "retrievable": true },
+    { "name": "deviationScore", "type": "Edm.Double", "filterable": true, "sortable": true, "retrievable": true },
+    { "name": "embedding", "type": "Collection(Edm.Single)", "searchable": true, "retrievable": false, "dimensions": 1536, "vectorSearchProfile": "default-vector-profile" },
+    { "name": "permissionPrincipals", "type": "Collection(Edm.String)", "filterable": true, "retrievable": true }
+  ],
+  "vectorSearch": {
+    "algorithms": [
+      {
+        "name": "hnsw-default",
+        "kind": "hnsw",
+        "hnswParameters": {
+          "metric": "cosine",
+          "m": 4,
+          "efConstruction": 400,
+          "efSearch": 500
+        }
+      }
+    ],
+    "profiles": [
+      {
+        "name": "default-vector-profile",
+        "algorithm": "hnsw-default"
+      }
+    ]
+  },
+  "semantic": {
+    "configurations": [
+      {
+        "name": "default",
+        "prioritizedFields": {
+          "titleField": { "fieldName": "sectionHeading" },
+          "prioritizedContentFields": [
+            { "fieldName": "clauseText" }
+          ],
+          "prioritizedKeywordsFields": [
+            { "fieldName": "clauseType" }
+          ]
+        }
+      }
+    ]
+  },
+  "corsOptions": {
+    "allowedOrigins": ["*"],
+    "maxAgeInSeconds": 60
+  }
+}

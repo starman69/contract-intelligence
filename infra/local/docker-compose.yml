@@ -1,0 +1,176 @@
+# Local runtime — full Contract Intelligence POC stack with no Azure deps.
+# Plan + trade-offs: ../../docs/poc/12-local-runtime.md
+#
+# This stack uses a plain FastAPI service (api) + a polling watcher (ingest)
+# instead of the Azure Functions runtime. Same shared.api.query() business
+# logic; just a thinner HTTP shell. The Azure deploy still uses Functions.
+#
+# Usage:
+#   cp .env.example .env             # adjust password / models if needed
+#   ./build.sh                        # builds the web frontend (npm)
+#   docker compose up -d              # builds the app image + brings everything up
+#   docker compose logs -f bootstrap  # watch the seed/pull progress
+#
+# Service URLs (host):
+#   web      http://localhost:8080
+#   api      http://localhost:7071/api/health
+#   docs     http://localhost:7071/api/docs
+#   ollama   http://localhost:11434
+#   qdrant   http://localhost:6333/dashboard
+#   azurite  http://localhost:10000  (blob), 10001 (queue), 10002 (table)
+#   mssql    sa / $MSSQL_SA_PASSWORD on localhost:1433
+
+x-shared-env: &shared_env
+  RUNTIME_PROFILE: local
+  PYTHONUNBUFFERED: "1"
+  LOCAL_BLOB_CONNECTION_STRING: ${AZURITE_CONN_STRING}
+  # AzureWebJobsStorage / __accountName were Functions-runtime concerns;
+  # the FastAPI/watcher services ignore them. Kept for parity with config.py
+  # which was originally written for the Functions environment.
+  AzureWebJobsStorage: ${AZURITE_CONN_STRING}
+  AzureWebJobsStorage__accountName: devstoreaccount1
+  DOC_INTELLIGENCE_ENDPOINT: http://unstructured:8000
+  OPENAI_ENDPOINT: http://ollama:11434/v1
+  OPENAI_API_VERSION: "2024-10-21"
+  OPENAI_DEPLOYMENT_EXTRACTION: ${OLLAMA_MODEL_EXTRACTION:-qwen2.5:7b-instruct}
+  OPENAI_DEPLOYMENT_REASONING: ${OLLAMA_MODEL_REASONING:-qwen2.5:7b-instruct}
+  OPENAI_DEPLOYMENT_EMBEDDING: ${OLLAMA_MODEL_EMBEDDING:-nomic-embed-text}
+  OLLAMA_BASE_URL: http://ollama:11434/v1
+  QDRANT_URL: http://qdrant:6333
+  UNSTRUCTURED_URL: http://unstructured:8000
+  SEARCH_SERVICE_ENDPOINT: http://qdrant:6333
+  SEARCH_INDEX_CONTRACTS: contracts-index
+  SEARCH_INDEX_CLAUSES: clauses-index
+  SQL_SERVER: mssql,1433
+  SQL_DATABASE: sqldb-contracts
+  LOCAL_SQL_USER: sa
+  LOCAL_SQL_PASSWORD: ${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD must be set in .env}
+
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD must be set}
+      MSSQL_PID: Developer
+    ports: ["1433:1433"]
+    volumes: [mssql-data:/var/opt/mssql]
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P "$$MSSQL_SA_PASSWORD" -Q "SELECT 1" -No
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    command: >
+      azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0
+              --location /data --skipApiVersionCheck
+    ports: ["10000:10000", "10001:10001", "10002:10002"]
+    volumes: [azurite-data:/data]
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.5
+    ports: ["6333:6333"]
+    volumes: [qdrant-data:/qdrant/storage]
+
+  ollama:
+    image: ollama/ollama:latest
+    ports: ["11434:11434"]
+    volumes: [ollama-data:/root/.ollama]
+    # GPU passthrough — requires NVIDIA driver + nvidia-container-toolkit on
+    # the host. If you don't have a GPU, comment the deploy block back out;
+    # ollama falls back to CPU automatically (slow on 7b models).
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  unstructured:
+    image: quay.io/unstructured-io/unstructured-api:latest
+    ports: ["8000:8000"]
+    environment:
+      UNSTRUCTURED_PARALLEL_MODE_ENABLED: "false"
+
+  bootstrap:
+    build:
+      context: .
+      dockerfile: Dockerfile.bootstrap
+    depends_on:
+      mssql: {condition: service_healthy}
+      azurite: {condition: service_started}
+      qdrant: {condition: service_started}
+      ollama: {condition: service_started}
+    environment:
+      MSSQL_HOST: "mssql,1433"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+      MSSQL_DB: sqldb-contracts
+      AZURITE_CONN_STRING: ${AZURITE_CONN_STRING}
+      QDRANT_URL: http://qdrant:6333
+      OLLAMA_URL: http://ollama:11434
+      EMBEDDING_DIM: ${EMBEDDING_DIM:-768}
+      OLLAMA_MODELS: ${OLLAMA_MODELS:-qwen2.5:7b-instruct,nomic-embed-text}
+    volumes:
+      - ../../scripts/sql:/sql:ro
+      - ../../samples/gold-clauses:/gold-clauses:ro
+    restart: "no"
+
+  # Local FastAPI server — wraps shared.api.query. Replaces the Azure Functions
+  # API host for local dev. Source mounted live so edits + restart take effect
+  # without a build.
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    depends_on:
+      bootstrap: {condition: service_completed_successfully}
+    environment: *shared_env
+    volumes:
+      - ../../src:/app/src:ro
+      - ../../tests:/app/tests:ro
+      # samples/ is read by tests/eval/field_extraction.py to score
+      # extraction against the synthetic manifest.
+      - ../../samples:/app/samples:ro
+    command: >
+      uvicorn local.api_server:app
+      --host 0.0.0.0 --port 8000
+      --log-level info
+    ports: ["7071:8000"]
+    restart: unless-stopped
+
+  # Local ingest watcher — polls Azurite raw/contracts/ and runs the same
+  # pipeline.process_blob_event the Functions blob trigger uses in prod.
+  ingest:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    depends_on:
+      bootstrap: {condition: service_completed_successfully}
+    environment:
+      <<: *shared_env
+      INGEST_POLL_INTERVAL: "5"
+    volumes:
+      - ../../src:/app/src:ro
+    command: python -m local.ingest_watcher
+    restart: unless-stopped
+
+  web:
+    image: nginx:alpine
+    depends_on: [api]
+    ports: ["8080:80"]
+    volumes:
+      - ../../src/web/dist:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+
+volumes:
+  mssql-data:
+  azurite-data:
+  qdrant-data:
+  ollama-data:

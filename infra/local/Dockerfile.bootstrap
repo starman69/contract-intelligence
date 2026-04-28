@@ -1,0 +1,23 @@
+# One-shot bootstrap container: waits for SQL/Azurite/Qdrant/Ollama, applies
+# the SQL schema, creates Azurite blob containers, creates Qdrant collections,
+# and pulls Ollama models. Built once with `docker compose build bootstrap`.
+FROM python:3.11-slim
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      curl gnupg2 ca-certificates unixodbc \
+ && curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
+      | gpg --dearmor -o /usr/share/keyrings/microsoft.gpg \
+ && echo "deb [signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/debian/12/prod bookworm main" \
+      > /etc/apt/sources.list.d/microsoft.list \
+ && apt-get update \
+ && ACCEPT_EULA=Y apt-get install -y msodbcsql18 \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir \
+      pyodbc==5.2.0 \
+      requests==2.32.3 \
+      azure-storage-blob==12.23.1
+
+COPY bootstrap.py /bootstrap.py
+ENTRYPOINT ["python", "-u", "/bootstrap.py"]

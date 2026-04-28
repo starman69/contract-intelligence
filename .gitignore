@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+.next/
+.turbo/
+
+# Azure Functions local
+local.settings.json
+bin/
+obj/
+.python_packages/
+
+# Bicep
+*.bicep.tmp
+main.json
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Claude Code local settings
+.claude/
+.mcp.json
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+
+# Local sample contracts (license-restricted; do not commit)
+samples/contracts/*
+!samples/contracts/.gitkeep
+
+# Build / coverage
+coverage/
+*.log
